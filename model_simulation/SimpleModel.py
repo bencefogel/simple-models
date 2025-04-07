@@ -46,8 +46,8 @@ class SimpleModel:
             sec.e_pas = self.E_PAS  # Resting potential (mV)
 
         # Set active properties
-        modpath = 'density_mechs'
-        h.nrn_load_dll(modpath + '\\nrnmech.dll')
+        modpath = 'model_simulation/density_mechs'
+        h.nrn_load_dll(modpath + '/nrnmech.dll')
 
         # soma
         self.soma.insert('nax')
