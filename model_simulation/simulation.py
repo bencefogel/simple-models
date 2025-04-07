@@ -1,9 +1,12 @@
 import numpy as np
 from neuron import h
 
-from recording_utils import record_time_vector, record_membrane_potential, preprocess_membrane_potential_data
-from model_simulation.record_intrinsic import  record_intrinsic_currents, preprocess_intrinsic_data
-from model_simulation.record_synaptic import record_synaptic_currents, preprocess_synaptic_data
+from model_simulation.recording_utils.record_membrane_potential import record_time_vector, record_membrane_potential, preprocess_membrane_potential_data
+from model_simulation.recording_utils.record_intrinsic import  record_intrinsic_currents, preprocess_intrinsic_data
+from model_simulation.recording_utils.record_synaptic import record_synaptic_currents, preprocess_synaptic_data
+from model_simulation.recording_utils.extract_areas import get_segment_areas
+from model_simulation.recording_utils.extract_connections import get_connections, get_external_connections, get_internal_connections
+
 
 def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.1, tstop=1000):
     # Set fixed time-step
@@ -43,6 +46,9 @@ def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.
                        'intrinsic_data': [intrinsic_segments, intrinsic_arrays],
                        'synaptic_data': [synaptic_segments, synaptic_arrays],
                        'taxis': taxis}
+    connections = {'external': get_external_connections(), 'internal': get_internal_connections()}
+    simulation_data['connections'] = get_connections(connections['external'], connections['internal'])
+    simulation_data['areas'] = get_segment_areas()
     return simulation_data
 
 
