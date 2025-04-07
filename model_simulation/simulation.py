@@ -1,24 +1,11 @@
 import numpy as np
 import pandas as pd
 from neuron import h
-from record_data import record_time_vector, record_membrane_potential
+
+from recording_utils import record_time_vector, record_membrane_potential, preprocess_membrane_potential_data
+from model_simulation.record_intrinsic import  record_intrinsic_currents, preprocess_intrinsic_data
 
 def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.1, tstop=1000):
-    """
-    Run a simulation with a current injection protocol.
-
-    Parameters:
-        model: The neuron model.
-        inj_site (str): The section where current is injected ('soma', 'dend1', etc.).
-        delay (float): Time (ms) before current starts.
-        duration (float): Duration (ms) of the current injection.
-        amplitude (float): Amplitude (nA) of the injected current.
-        tstop (float): Total simulation time (ms).
-
-    Returns:
-        t (numpy array): Time vector.
-        v (numpy array): Voltage at the soma.
-    """
     # Set fixed time-step
     h.CVode().active(False)  # Disable variable time-step solver
     h.dt = 0.2  # ms
@@ -36,15 +23,25 @@ def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.
 
     t = record_time_vector()
     v_seg, v = record_membrane_potential()
+    intrinsic_seg, intrinsic_currents = record_intrinsic_currents()
 
     # Run the simulation
     h.finitialize(-64.54)
     h.continuerun(tstop)
 
-    df_v = pd.DataFrame(data = np.array(v), index=v_seg)
-    df_v.columns = list(df_v.columns)
+    # preprocess time axis
+    taxis = np.array(t)
 
-    return np.array(t), df_v
+    # preprocess voltage data
+    v_segments, v_arrays = preprocess_membrane_potential_data(v_seg, v)
+    intrinsic_segments, intrinsic_arrays = preprocess_intrinsic_data(intrinsic_seg, intrinsic_currents)
+
+
+    simulation_data = {'membrane_potential_data': [v_segments, v_arrays],
+                       'intrinsic_data': [intrinsic_segments, intrinsic_arrays],
+                       'taxis': taxis}
+
+    return simulation_data
 
 
 def add_single_synapse(model, target_section, syn_type, event_time, loc=0.5, weight=0.001):
