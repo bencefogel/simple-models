@@ -3,6 +3,10 @@ from neuron import h
 
 class SimpleModel:
     def __init__(self):
+        # Initialize the synapse reference storage
+        self._syn_refs = []
+
+        # Set up model
         props(self)
         self.topology()
         self.biophysics()
@@ -53,6 +57,13 @@ class SimpleModel:
             dend.insert('kdr')
             dend.gbar_nad = self.gna_dend
             dend.gkdrbar_kdr = self.gkdr_dend
+
+    def add_synapse_ref(self, syn, stim, nc):
+        """
+        Adds the synapse, stimulus, and connection to the internal reference list to
+        prevent garbage collection from deleting them.
+        """
+        self._syn_refs.append((syn, stim, nc))
 
 def props(model):
     # Passive properties

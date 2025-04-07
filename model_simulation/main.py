@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 
 from SimpleModel import SimpleModel
-from simulation import run_simulation
+from simulation import run_simulation, add_single_synapse
 from neuron import h, gui
 
 
 model = SimpleModel()
-t, v = run_simulation(model, 'soma', delay=20, duration=15, amplitude=0.01, tstop=100)
+add_single_synapse(model, 'soma', 'AMPA', 20, loc=0.5, weight=0.0001)
+t, v = run_simulation(model, 'soma', delay=20, duration=15, amplitude=0, tstop=100)
 
 # Plot the results
 plt.figure(figsize=(8, 5))
