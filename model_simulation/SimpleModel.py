@@ -5,6 +5,10 @@ class SimpleModel:
     def __init__(self):
         # Initialize the synapse reference storage
         self._syn_refs = []
+        self.AMPAlist = []
+        self.NMDAlist = []
+        self.GABAlist = []
+        self.GABA_Blist = []
 
         # Set up model
         props(self)
@@ -59,11 +63,15 @@ class SimpleModel:
             dend.gkdrbar_kdr = self.gkdr_dend
 
     def add_synapse_ref(self, syn, stim, nc):
-        """
-        Adds the synapse, stimulus, and connection to the internal reference list to
-        prevent garbage collection from deleting them.
-        """
         self._syn_refs.append((syn, stim, nc))
+        if syn.e == 0 and syn.tau1 == 0.1:  # AMPA
+            self.AMPAlist.append(syn)
+        elif syn.e == 0 and syn.tau1 == 2:  # NMDA
+            self.NMDAlist.append(syn)
+        elif syn.e == -65:  # GABA fast
+            self.GABAlist.append(syn)
+        elif syn.e == -80:  # GABA slow
+            self.GABA_Blist.append(syn)
 
 def props(model):
     # Passive properties

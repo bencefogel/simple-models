@@ -6,9 +6,5 @@ from neuron import h, gui
 
 
 model = SimpleModel()
-add_single_synapse(model, 'soma', 'AMPA', 20, loc=0.5, weight=0)
+add_single_synapse(model, 'soma', 'NMDA', 20, loc=0.5, weight=0)
 simulation_data = run_simulation(model, 'soma', delay=20, duration=1, amplitude=0.1, tstop=100)
-
-
-
-

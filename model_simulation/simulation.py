@@ -1,9 +1,9 @@
 import numpy as np
-import pandas as pd
 from neuron import h
 
 from recording_utils import record_time_vector, record_membrane_potential, preprocess_membrane_potential_data
 from model_simulation.record_intrinsic import  record_intrinsic_currents, preprocess_intrinsic_data
+from model_simulation.record_synaptic import record_synaptic_currents, preprocess_synaptic_data
 
 def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.1, tstop=1000):
     # Set fixed time-step
@@ -21,9 +21,11 @@ def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.
     stim.dur = duration
     stim.amp = amplitude
 
+    # Record data
     t = record_time_vector()
     v_seg, v = record_membrane_potential()
     intrinsic_seg, intrinsic_currents = record_intrinsic_currents()
+    synaptic_seg, synaptic_currents = record_synaptic_currents(model)
 
     # Run the simulation
     h.finitialize(-64.54)
@@ -35,12 +37,12 @@ def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.
     # preprocess voltage data
     v_segments, v_arrays = preprocess_membrane_potential_data(v_seg, v)
     intrinsic_segments, intrinsic_arrays = preprocess_intrinsic_data(intrinsic_seg, intrinsic_currents)
-
+    synaptic_segments, synaptic_arrays = preprocess_synaptic_data(synaptic_seg, synaptic_currents)
 
     simulation_data = {'membrane_potential_data': [v_segments, v_arrays],
                        'intrinsic_data': [intrinsic_segments, intrinsic_arrays],
+                       'synaptic_data': [synaptic_segments, synaptic_arrays],
                        'taxis': taxis}
-
     return simulation_data
 
 
