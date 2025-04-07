@@ -1,6 +1,7 @@
-from neuron import h
 import numpy as np
-
+import pandas as pd
+from neuron import h
+from record_data import record_time_vector, record_membrane_potential
 
 def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.1, tstop=1000):
     """
@@ -33,15 +34,17 @@ def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.
     stim.dur = duration
     stim.amp = amplitude
 
-    # Setup recording variables
-    t = h.Vector().record(h._ref_t)  # Time
-    v = h.Vector().record(model.soma(0.5)._ref_v)  # Voltage at soma
+    t = record_time_vector()
+    v_seg, v = record_membrane_potential()
 
     # Run the simulation
     h.finitialize(-64.54)
     h.continuerun(tstop)
 
-    return np.array(t), np.array(v)
+    df_v = pd.DataFrame(data = np.array(v), index=v_seg)
+    df_v.columns = list(df_v.columns)
+
+    return np.array(t), df_v
 
 
 def add_single_synapse(model, target_section, syn_type, event_time, loc=0.5, weight=0.001):
@@ -104,4 +107,5 @@ def add_single_synapse(model, target_section, syn_type, event_time, loc=0.5, wei
     nc.weight[0] = weight
 
     model.add_synapse_ref(syn, stim, nc)  # Store references in model to prevent GC
-    print(f"Synapse added at loc {loc} on {target_section}, type {syn_type}, weight {weight}")
+    if weight != 0:
+        print(f"Synapse added at loc {loc} on {target_section}, type {syn_type}, weight {weight}")
