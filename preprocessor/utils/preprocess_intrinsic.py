@@ -30,8 +30,18 @@ def preprocess_intrinsic(segments, values, area):
     for curr in currents:
         seg = segments[curr]
         val = values[curr]
-        df = pd.DataFrame(data=val, index=seg)
-        df_converted = change_unit_na(df, area)
+        # Ensure val and seg have the same length
+        if curr == 'injected_current':
+            # Reshape val into a 2D array with one row
+            val_reshaped = val.reshape(1, -1)
+            df = pd.DataFrame(data=-1*val_reshaped)  # *-1 to follow convention
+            df['index'] = seg
+            df_converted = df
+        else:
+            df = pd.DataFrame(data=val, index=seg)
+            df_converted = change_unit_na(df, area)
+
+
         df_converted.insert(1, 'itype', curr)
         df_converted[['index', 'itype']] = df_converted[['index', 'itype']].astype('category')
         dfs.append(df_converted)

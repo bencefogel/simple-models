@@ -53,4 +53,3 @@ class Preprocessor:
         self.axial_current_preprocessor.calculate_axial_currents(self.simulation_data)
         iax = self.axial_current_preprocessor.merge_section_iax(self.target)
         return iax
-

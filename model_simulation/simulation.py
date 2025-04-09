@@ -10,8 +10,8 @@ from model_simulation.recording_utils.extract_connections import get_connections
 
 def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.1, tstop=1000):
     # Set fixed time-step
-    h.CVode().active(False)  # Disable variable time-step solver
-    h.dt = 0.2  # ms
+    h.CVode().active(True)
+    h.CVode().atol((1e-3))
 
     # Get the section object from the model
     section = getattr(model, inj_site, None)
@@ -29,6 +29,11 @@ def run_simulation(model, inj_site='soma', delay=100, duration=500, amplitude=0.
     v_seg, v = record_membrane_potential()
     intrinsic_seg, intrinsic_currents = record_intrinsic_currents()
     synaptic_seg, synaptic_currents = record_synaptic_currents(model)
+
+    # Record injected current and add to intrinsic data
+    injected_current = h.Vector().record(stim._ref_i)
+    intrinsic_seg['injected_current'] = f'{inj_site}(0.5)'
+    intrinsic_currents['injected_current'] = injected_current  # -1 to follow convention
 
     # Run the simulation
     h.finitialize(-64.54)

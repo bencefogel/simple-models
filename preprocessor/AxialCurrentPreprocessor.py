@@ -74,9 +74,43 @@ class AxialCurrentPreprocessor:
         return self.merge_dendrite_iax(target)
 
     def merge_soma_iax(self) -> pd.DataFrame:
-        """no merging implemented currently"""
+        """
+        Merges soma-related axial currents and updates the parent labels to 'soma'.
+
+        Returns:
+            pd.DataFrame: The merged axial current DataFrame with soma connections.
+        """
         df = self.axial_current
-        return df
+
+        # Get axial currents for specific soma segments
+        # df_iax_soma_1 = get_segment_iax('soma(0.166667)', df)
+        df_iax_soma_2 = get_segment_iax('soma(0.5)', df)
+        # df_iax_soma_3 = get_segment_iax('soma(0.833333)', df)
+        df_iax_soma_4 = get_segment_iax('soma(1)', df)
+
+        # Soma-dendrite axial currents
+        iax_dend1 = df_iax_soma_4.loc[[("dend1(0.5)", "soma(1)")]]
+
+        # Merge soma axial currents
+        df_iax_soma_merged = iax_dend1
+
+        # Update parent labels to 'soma'
+        index_tuples = df_iax_soma_merged.index.tolist()
+        new_index_tuples = [(ref, 'soma') for ref, par in index_tuples]
+        new_index = pd.MultiIndex.from_tuples(new_index_tuples, names=df_iax_soma_merged.index.names)
+        df_iax_soma_merged.index = new_index
+
+        # Remove internal axial current rows (with "soma" in "ref")
+        ref_idx = df[df.index.get_level_values("ref").str.contains("soma")].index
+        df_iax_ref_removed = df.drop(ref_idx)
+
+        # Remove original soma-dendrite axial currents (with "soma" in "par")
+        par_idx = df_iax_ref_removed[df_iax_ref_removed.index.get_level_values("par").str.contains("soma")].index
+        df_iax_removed = df_iax_ref_removed.drop(par_idx)
+
+        # Combine updated segments
+        self.axial_current_soma_merged = pd.concat([df_iax_removed, df_iax_soma_merged], axis=0)
+        return self.axial_current_soma_merged
 
     def merge_dendrite_iax(self, target: str) -> pd.DataFrame:
         """

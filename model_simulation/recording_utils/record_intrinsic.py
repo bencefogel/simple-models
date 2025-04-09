@@ -11,7 +11,7 @@ current_types = {
         'kad': '_ref_ik_kad',
         'kslow': '_ref_ik_kslow',
         'passive': '_ref_i_pas',
-        'capacitive': '_ref_i_cap',
+        'capacitive': '_ref_i_cap'
     }
 
 
